@@ -30,7 +30,7 @@ v1.0
 
 ## 效果展示
 
-![image-20220904231406896](C:\Users\mhp3l\AppData\Roaming\Typora\typora-user-images\image-20220904231406896.png)
+[![vT87aq.png](https://s1.ax1x.com/2022/09/04/vT87aq.png)](https://imgse.com/i/vT87aq)
 
 ## 组件使用说明
 
@@ -89,7 +89,7 @@ v1.0
 
 在updated钩子中比较`renderIndex`与`list.length`，判断`list`中是否渲染完毕，若没有，则`renderIndex++`，触发侦听，进行渲染。如此循环，直至渲染完毕。
 
-![image-20220904212258855](C:\Users\mhp3l\AppData\Roaming\Typora\typora-user-images\image-20220904212258855.png)
+[![vT8qiV.png](https://s1.ax1x.com/2022/09/04/vT8qiV.png)](https://imgse.com/i/vT8qiV)
 
 ### 获得最低列
 
