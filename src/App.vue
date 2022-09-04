@@ -1,19 +1,19 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <WaterFall :list="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]" :col="7">
+      <template #content="{ item }">
+        <div>{{ item }}</div>
+      </template>
+    </WaterFall>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import WaterFall from "./waterFall/index.vue";
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  name: "App",
+  components: { WaterFall },
+};
 </script>
 
 <style>
