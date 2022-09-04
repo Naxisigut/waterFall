@@ -6,12 +6,7 @@
 
 <script>
 export default {
-  props: {
-    contents: {
-      type: String,
-      default: "test",
-    },
-  },
+  name: "SingleCard",
 };
 </script>
 
