@@ -34,29 +34,25 @@ export default {
   },
   watch: {
     list: {
-      //每当接收到新数据，把渲染序号重置为0
       immediate: true,
       handler() {
+        //每当list更新，把渲染序号重置为0
         this.$nextTick(() => (this.renderIndex = 0));
       },
     },
+
     /* 渲染单张瀑布流卡片 */
-    renderIndex: {
-      immediate: true,
-      handler(idx, oldIdx) {
-        if (oldIdx === undefined) return;
-        if (!this.list) return;
-        if (this.renderIndex >= this.list.length) return; // 此时渲染完毕
-        // 获得最短的列的索引
-        let index = this.getMinIndex(Array.from(this.$refs.container.children));
-        this.colList[index].push(this.list[idx]); // 将data push到最短的列里面
-      },
+    renderIndex(idx, oldIdx) {
+      if (oldIdx === undefined || !this.list) return;
+      if (this.renderIndex >= this.list.length) return; // 此时渲染完毕
+      let index = this.getMinIndex(Array.from(this.$refs.container.children)); // 获得最短列的索引
+      this.colList[index].push(this.list[idx]); // 将data push到最短的列里面
     },
   },
   methods: {
-    /* 获得最短的列的索引号 */
+    /* 获得最短列的索引号 */
     getMinIndex(HtmlArr) {
-      const arr = HtmlArr.map((item) => item.clientHeight);
+      const arr = HtmlArr.map((item) => item.offsetHeight);
       let val = Math.min(...arr);
       return arr.findIndex((item) => item == val);
     },
@@ -64,7 +60,7 @@ export default {
   updated() {
     //一次渲染一条数据，增加索引，直到最大索引
     // 思考是否有一次渲染所有卡片的方法？
-    console.log("updated =");
+    // 好像没有，节点的高度只有在渲染完成后才能获取
     if (this.renderIndex < this.list.length) this.renderIndex++;
   },
 };
@@ -72,22 +68,15 @@ export default {
 
 <style scoped>
 .container {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
   align-items: flex-start;
 }
 .columnBox {
-  /* width: 33%; */
   flex: 1;
   margin: 0 10px;
-  /* min-height: 200px; */
   background-color: red;
-}
-.el-button:focus,
-.el-button:hover {
-  color: #606266;
-  border-color: #dcdfe6;
-  background-color: #eee;
 }
 </style>
