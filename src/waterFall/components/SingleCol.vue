@@ -13,6 +13,8 @@ export default {};
 .columnBox {
   flex: 1;
   margin: 0 10px;
-  background-color: red;
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
 }
 </style>
