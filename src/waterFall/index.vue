@@ -66,7 +66,7 @@ export default {
     getMinIndex(HtmlArr) {
       const arr = HtmlArr.map((item) => item.offsetHeight);
       let val = Math.min(...arr);
-      return arr.findIndex((item) => item == val);
+      return arr.findIndex((item) => item === val);
     },
   },
   mounted() {

@@ -11,6 +11,9 @@ export default {
 </script>
 
 <style scoped>
+.card {
+  margin-bottom: 20px;
+}
 img {
   width: 100%;
 }

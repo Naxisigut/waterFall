@@ -1,24 +1,124 @@
 # waterfall
 
-## Project setup
+## 项目说明
+
+该组件通过JS + CSS flex布局 + Vue数据响应式，在Vue2中实现瀑布流布局。
+
+####  版本信息
+
+v1.0
+
+后续可能会用v3重写，可能新开个仓库，也可能直接重写这个仓库。
+
+#### 瀑布流
+
+瀑布流布局是一种网站呈现的样式，往往用在卡片/图片/短文字呈现等碎片信息比较多的场合。
+
+这种样式比较新颖美观，也方便用户快速浏览信息。
+
+#### 瀑布流的实现方式
+
+瀑布流的实现方式大致有两种：
+
+1. 使用CSS浮动。这种方式比较方便。
+
+2. 直接操作DOM，通过JS代码判断最短列，将卡片放置其中。这种方式比较麻烦，也浪费性能。
+
+   本组件使用第二种方式，尝试使用JS来进行布局。
+
+   并没有什么突出的优势，仅仅是一种尝试。以后有时间也尝试用第一种方法来解决。
+
+## 效果展示
+
+![image-20220904231406896](C:\Users\mhp3l\AppData\Roaming\Typora\typora-user-images\image-20220904231406896.png)
+
+## 组件使用说明
+
+- 组件需要两个来自父组件的props：
+
+  - `list: array` 瀑布流所使用的数据
+
+  - `col: number` 瀑布流的列数
+
+- 组件提供一个具名插槽
+
+  - 插槽名：`content`
+
+  - 插槽作用域：返回`item`，为`list`单个元素
+
+  - 使用该插槽定制卡片样式
+## 组件使用注意事项
+该组件并不完善，有些问题目前还不知道怎么解决：
+1. 若卡片的高度是**<u>异步</u>**确定的，那么每次刷新，瀑布流的顺序可能并不一样！
+
+   比如若卡片内包含图片，那么在图片加载完成之前，组件无法确认未加载完成的图片的高度对列的高度的影响。
+
+   这个bug非常容易复现。设定一个场景：瀑布流5列，单次增加5+以上的图片，那么多次刷新的结果就可能会不一致。因为组件分配卡片的条件是基于当前已有的列高度来判断的，如果第6,7,8...张卡片在插入瀑布流时，前面一列还尚未加载完毕，那么就会出现判断的失误。
+
+   事实上，上面这个结论也并不完全准确，因为在某些极端情况下，有可能需要连续多张卡片分配到同一列（个别图片特别长/图片之间的长度方差过大时），这时单次增加5张以下的图片也可能会出现失误。
+
+   **不过或许你不需要过于担心：**
+
+   1. 只要请求速度正常，图片的排列顺序可能不完全一致，但最后的效果还是正常的瀑布流，即瀑布流各列底部之间的差距不会过大，在1~2张图片的长度左右。
+   2. 按常理推断，瀑布流布局中对于单张卡片的位置不应有精确性要求，因为瀑布流是大量信息的聚合，除了广告卡片，其它卡片随机排列并无不妥。在对于排列顺序和位置要求严格的场合，请选择其它组件/插件。
+   3. 在使用文字卡片等同步数据时，不会出现这个bug。
+
+2. 性能浪费比较严重。
+
+   这个和组件实现瀑布流的原理有关：每增加一张卡片，都要走一个`beforeUpdate`-`updated`周期，所以要渲染很多次。并且单次增加的卡片过多时会出现明显的卡顿。如果对性能要求比较高，请仔细权衡后再使用。
+
+## 实现瀑布流的原理
+
+其实代码里已经注释得比较清楚，这里挑重点说明。
+
+### 插槽透传
+
+把插槽透传进最深的`SingleCard`组件，规避了插槽`v-for`的问题。
+
+### flex布局
+
+利用flex布局把整个容器分为约定的列数，宽度自适应。
+
+### 分配卡片
+
+在组件mounted时获取容器的所有亲代子元素，即所有瀑布列节点。
+
+使用一个渲染索引`renderIndex`，标志当前渲染的元素在list中的索引。
+
+在组件中`watch`侦听渲染索引，一旦发生改变，立即查询瀑布列子节点中的高度最低者，将索引对应的卡片`push`进入该列对应的数据数组，vue响应式更新页面，渲染卡片，触发`updated`钩子。
+
+在updated钩子中比较`renderIndex`与`list.length`，判断`list`中是否渲染完毕，若没有，则`renderIndex++`，触发侦听，进行渲染。如此循环，直至渲染完毕。
+
+![image-20220904212258855](C:\Users\mhp3l\AppData\Roaming\Typora\typora-user-images\image-20220904212258855.png)
+
+### 获得最低列
+
+简单的操作DoM后进行遍历
+
 ```
-npm install
+this.colNodeList = *Array*.from(this.$refs.container.children); // 获取瀑布列节点数组
 ```
 
-### Compiles and hot-reloads for development
 ```
-npm run serve
+  methods: {
+    /* 获得最短列的索引号 */
+    getMinIndex(HtmlArr) {
+      const arr = HtmlArr.map((item) => item.offsetHeight);
+      let val = Math.min(...arr);
+      return arr.findIndex((item) => item === val);
+    },
+  },
+  
+  watch: {
+    /* 每当渲染索引变化，渲染单张瀑布流卡片 */
+    /* 每次渲染完毕，索引值会停在当前list的length-1 */
+    renderIndex(idx, oldIdx) {
+      if (oldIdx === undefined || !this.list) return;
+      let index = this.getMinIndex(this.colNodeList); // 获得最短列的索引
+       this.colDataList[index].push(this.list[idx]); // 将data push到最短列里面
+    },
+  },
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
 
-### Lints and fixes files
-```
-npm run lint
-```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
