@@ -35,9 +35,10 @@ export default {
   watch: {
     list: {
       immediate: true,
+      deep: true,
       handler() {
-        //每当list更新，把渲染序号重置为0
-        this.$nextTick(() => (this.renderIndex = 0));
+        // if (oldVal) return; // 只有第一次渲染时需要从0开始
+        this.$nextTick(() => this.renderIndex++);
       },
     },
 
@@ -61,7 +62,7 @@ export default {
     //一次渲染一条数据，增加索引，直到最大索引
     // 思考是否有一次渲染所有卡片的方法？
     // 好像没有，节点的高度只有在渲染完成后才能获取
-    if (this.renderIndex < this.list.length) this.renderIndex++;
+    if (this.renderIndex < this.list.length - 1) this.renderIndex++;
   },
 };
 </script>
